@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 public class CSVLoader
 {
     private TextAsset csvFile;
+    private char lineSeperator = '\n';
+    private string[] fieldSeperator = new string[] { "\",\"" };
+    private readonly string fileName = "localization";
 
     // Start is called before the first frame update
     public void LoadCSV()
     {
-        csvFile = Resources.Load<TextAsset>("localization");
+        csvFile = Resources.Load<TextAsset>(fileName);
     }
     public Dictionary<string, string> GetDictionaryValuesForLanguage(string attributeID)
     {
-        char lineSeperator = '\n';
-        string[] fieldSeperator = new string[] { "\",\"" };
+        
 
         Dictionary<string, string> dict = new Dictionary<string, string>();
 
@@ -80,4 +83,40 @@ public class CSVLoader
         }
         return dict;
     }
+#if UNITY_EDITOR
+    public void Add(string key, string value)
+    {
+        string appended = string.Format("\n\"{0}\",\"{1}\",\"\"", key, value);
+        File.AppendAllText($"Assets/Resources/{fileName}.csv", appended);
+
+        UnityEditor.AssetDatabase.Refresh();
+    }
+    public void Remove(string key)
+    {
+        string[] lines = csvFile.text.Split(lineSeperator);
+        int index = -1;
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i];
+            if (line.Split(fieldSeperator, System.StringSplitOptions.None)[0].Contains(key))
+            {
+                index = i;
+                break;
+            }
+        }
+        if (index > -1)
+        {
+            string[] newLines = lines.Where(w => w!= lines[index]).ToArray();
+
+            string replacedLines = string.Join(lineSeperator.ToString(), newLines);
+            File.WriteAllText($"Assets/Resources/{fileName}.csv", replacedLines);
+        }
+    }
+    public void Edit(string key, string value)
+    {
+        Remove(key);
+        Add(key, value);
+    }
+#endif
 }

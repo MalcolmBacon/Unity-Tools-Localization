@@ -7,10 +7,9 @@ using TMPro;
 public class TextLocalizerUI : MonoBehaviour
 {
     TextMeshProUGUI textField;
-    public string key;
+    public LocalizedString localizedString;
     private void Start() {
         textField = GetComponent<TextMeshProUGUI>();
-        string value = LocalizationSystem.GetLocalizedValue(key);
-        textField.text = value;
+        textField.text = localizedString.value;
     }
 }
