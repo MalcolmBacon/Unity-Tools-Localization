@@ -59,6 +59,45 @@ public class LocalizationSystem
 
         return value;
     }
+    public static string GetLocalizedValueForEditor(string key, Language language)
+    {
+        if (!isInit)
+        {
+            Init();
+        }
+
+        string value = key;
+
+        switch (language)
+        {
+            case Language.English:
+                localizedEN.TryGetValue(key, out value);
+                break;
+            case Language.French:
+                localizedFR.TryGetValue(key, out value);
+                break;
+        }
+
+        return value;
+    }
+    public static void Add(string key, string[] values)
+    {
+        for (int i = 0; i < values.Length; i++)
+        {
+            values[i] = ValidateInput(values[i]);
+        }
+
+        if (csvLoader == null)
+        {
+            csvLoader = new CSVLoader();
+        }
+
+        csvLoader.LoadCSV();
+        csvLoader.Add(key, values);
+        csvLoader.LoadCSV();
+
+        UpdateDictionaries();
+    }
     public static void Add(string key, string value)
     {
         value = ValidateInput(value);
@@ -73,6 +112,26 @@ public class LocalizationSystem
         csvLoader.LoadCSV();
 
         UpdateDictionaries();
+    }
+    public static void Replace(string key, string[] values)
+    {
+        Debug.Log("Replacing values");
+
+        // for (int i = 0; i < values.Length; i++)
+        // {
+        //     values[i] = ValidateInput(values[i]);
+        // }
+
+        // if (csvLoader == null)
+        // {
+        //     csvLoader = new CSVLoader();
+        // }
+
+        // csvLoader.LoadCSV();
+        // csvLoader.Edit(key, values);
+        // csvLoader.LoadCSV();
+
+        // UpdateDictionaries();
     }
     public static void Replace(string key, string value)
     {

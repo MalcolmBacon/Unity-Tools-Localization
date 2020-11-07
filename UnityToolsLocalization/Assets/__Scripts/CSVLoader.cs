@@ -10,17 +10,15 @@ public class CSVLoader
     private TextAsset csvFile;
     private char lineSeperator = '\n';
     private string[] fieldSeperator = new string[] { "\",\"" };
-    private readonly string fileName = "localization";
+    private readonly string localizationFileName = "localization";
 
     // Start is called before the first frame update
     public void LoadCSV()
     {
-        csvFile = Resources.Load<TextAsset>(fileName);
+        csvFile = Resources.Load<TextAsset>(localizationFileName);
     }
     public Dictionary<string, string> GetDictionaryValuesForLanguage(string attributeID)
     {
-        
-
         Dictionary<string, string> dict = new Dictionary<string, string>();
 
         string[] lines = csvFile.text.Split(lineSeperator);
@@ -84,10 +82,17 @@ public class CSVLoader
         return dict;
     }
 #if UNITY_EDITOR
+    public void Add(string key, string[] values)
+    {
+        string appended = string.Format("\n\"{0}\",{1}", key, string.Join(",", values.Select(v => "\"" + v + "\"")));
+        File.AppendAllText($"Assets/Resources/{localizationFileName}.csv", appended);
+
+        UnityEditor.AssetDatabase.Refresh();
+    }
     public void Add(string key, string value)
     {
         string appended = string.Format("\n\"{0}\",\"{1}\",\"\"", key, value);
-        File.AppendAllText($"Assets/Resources/{fileName}.csv", appended);
+        File.AppendAllText($"Assets/Resources/{localizationFileName}.csv", appended);
 
         UnityEditor.AssetDatabase.Refresh();
     }
@@ -110,7 +115,7 @@ public class CSVLoader
             string[] newLines = lines.Where(w => w!= lines[index]).ToArray();
 
             string replacedLines = string.Join(lineSeperator.ToString(), newLines);
-            File.WriteAllText($"Assets/Resources/{fileName}.csv", replacedLines);
+            File.WriteAllText($"Assets/Resources/{localizationFileName}.csv", replacedLines);
         }
     }
     public void Edit(string key, string value)
