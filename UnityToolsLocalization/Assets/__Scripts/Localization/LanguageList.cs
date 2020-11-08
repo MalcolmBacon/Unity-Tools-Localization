@@ -6,4 +6,6 @@ public class LanguageList : ScriptableObject
 {
     [HideInInspector]
     public List<Language> languageItemList;
+    [HideInInspector]
+    public string selectedLanguage;
 }

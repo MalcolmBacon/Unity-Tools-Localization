@@ -16,12 +16,7 @@ MonoBehaviour:
   - language: English
     translationList:
     - key: hello_world
-      translation: 'Hello world! '
-  - language: French
-    translationList:
-    - key: hello_world
-      translation: Bonjour
-  - language: New Language
-    translationList:
-    - key: hello_world
-      translation: 
+      translation: Hello world!
+    - key: goodbye_world
+      translation: Goodbye
+  selectedLanguage: English

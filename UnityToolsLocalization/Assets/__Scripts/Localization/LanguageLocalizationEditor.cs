@@ -23,7 +23,6 @@ public class LanguageLocalizationEditor : EditorWindow
             string objectPath = EditorPrefs.GetString("ObjectPath");
             languageList = AssetDatabase.LoadAssetAtPath(objectPath, typeof(LanguageList)) as LanguageList;
         }
-
     }
     private void OnGUI()
     {
@@ -79,12 +78,14 @@ public class LanguageLocalizationEditor : EditorWindow
 
             if (GUILayout.Button("Add Language", GUILayout.ExpandWidth(false)))
             {
+                GUI.FocusControl(null);
                 AddNewLanguage();
             }
             if (GUILayout.Button("Delete Language", GUILayout.ExpandWidth(false)))
             {
                 if (languageList.languageItemList.Any())
                 {
+                    GUI.FocusControl(null);
                     DeleteLanguage(viewIndex - 1);
                 }
             }
@@ -99,15 +100,20 @@ public class LanguageLocalizationEditor : EditorWindow
             {
                 GUILayout.BeginHorizontal();
                 viewIndex = Mathf.Clamp(EditorGUILayout.IntField("Current Language", viewIndex, GUILayout.ExpandWidth(false)), 1, languageList.languageItemList.Count);
-                EditorGUILayout.LabelField("of   " + languageList.languageItemList.Count.ToString() + "  languages", "", GUILayout.ExpandWidth(false));
+                EditorGUILayout.LabelField("of   " + languageList.languageItemList.Count.ToString() + "  languages", GUILayout.MinWidth(100));//, GUILayout.ExpandWidth(false));
+                if (GUILayout.Button("Use as language", new GUILayoutOption[] { GUILayout.Width(150), GUILayout.MaxWidth(150), GUILayout.MinWidth(150) }))
+                {
+                    SetGlobalLanguage();
+                }
                 GUILayout.EndHorizontal();
+
 
                 languageList.languageItemList[viewIndex - 1].language = EditorGUILayout.TextField("Language Name", languageList.languageItemList[viewIndex - 1].language as string);
 
                 GUILayout.Space(10);
                 GUILayout.BeginHorizontal();
-                newKey = EditorGUILayout.TextField("Add New Key: ", newKey);
-                if (GUILayout.Button("Add New Key", new GUILayoutOption[] { GUILayout.MaxWidth(150), GUILayout.ExpandWidth(false) }))
+                newKey = EditorGUILayout.TextField("Add New Key: ", newKey, GUILayout.MinWidth(310));
+                if (GUILayout.Button("Add New Key", new GUILayoutOption[] { GUILayout.MaxWidth(150), GUILayout.MinWidth(150) }))
                 {
                     if (string.IsNullOrEmpty(newKey))
                     {
@@ -126,19 +132,14 @@ public class LanguageLocalizationEditor : EditorWindow
 
                 for (int i = 0; i < languageList.languageItemList[viewIndex - 1].translationList.Count; i++)
                 {
-                    //string key = languageList.languageItemList[viewIndex - 1].translationList[i].key;
-                    //string translation = languageList.languageItemList[viewIndex - 1].translationList[i].translation;
-
                     GUILayout.BeginHorizontal();
-                    //EditorGUILayout.LabelField(key, GUILayout.MaxWidth(50));
                     EditorGUILayout.LabelField(languageList.languageItemList[viewIndex - 1].translationList[i].key, GUILayout.MaxWidth(150));
 
-                    languageList.languageItemList[viewIndex - 1].translationList[i].translation = EditorGUILayout.TextField(languageList.languageItemList[viewIndex - 1].translationList[i].translation);
-                    if (GUILayout.Button("Delete Key", new GUILayoutOption[] { GUILayout.MaxWidth(150), GUILayout.ExpandWidth(false) }))
+                    languageList.languageItemList[viewIndex - 1].translationList[i].translation = EditorGUILayout.TextField(languageList.languageItemList[viewIndex - 1].translationList[i].translation, GUILayout.MinWidth(155));
+                    if (GUILayout.Button("Delete Key", new GUILayoutOption[] { GUILayout.MaxWidth(150), GUILayout.MinWidth(150) }))
                     {
                         DeleteKey(i);
                     }
-                    //languageList.languageItemList[viewIndex - 1].translationList[i].translation = EditorGUI
                     GUILayout.EndHorizontal();
                 }
             }
@@ -170,6 +171,14 @@ public class LanguageLocalizationEditor : EditorWindow
             };
             languageList.languageItemList[i].translationList.Add(translation);
         }
+    }
+    private void SetGlobalLanguage()
+    {
+        languageList.selectedLanguage = languageList.languageItemList[viewIndex - 1].language;
+    }
+    private void ResetGlobalLanguage()
+    {
+        languageList.selectedLanguage = string.Empty;
     }
     private bool KeyAlreadyExists(string newKey)
     {
@@ -208,10 +217,34 @@ public class LanguageLocalizationEditor : EditorWindow
         languageItem.language = "New Language";
         languageList.languageItemList.Add(languageItem);
         viewIndex = languageList.languageItemList.Count;
+
+        if (languageList.languageItemList.Count == 1)
+        {
+            SetGlobalLanguage();
+        }
     }
     private void DeleteLanguage(int index)
     {
+        bool removingSelectedLanguage = false;
+
+        if (languageList.selectedLanguage == languageList.languageItemList[index].language)
+        {
+            removingSelectedLanguage = true;
+        }
+
         languageList.languageItemList.RemoveAt(index);
+
+        if (!languageList.languageItemList.Any())
+        {
+            ResetGlobalLanguage();
+        }
+        else
+        {
+            if (removingSelectedLanguage)
+            {
+                SetGlobalLanguage();
+            }
+        }
     }
     private List<string> GetAllActiveKeys()
     {
@@ -225,7 +258,6 @@ public class LanguageLocalizationEditor : EditorWindow
         }
         return activeKeys;
     }
-
     private void CreateNewLanguageList()
     {
         viewIndex = 1;
